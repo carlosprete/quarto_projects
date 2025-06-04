@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -99,655 +99,96 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="preprocessing" class="level2">
 <h2 class="anchored" data-anchor-id="preprocessing">Preprocessing</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.0.4     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: splines
-Loading required package: gamlss.data
-
-Attaching package: 'gamlss.data'
-
-The following object is masked from 'package:datasets':
-
-    sleep
-
-Loading required package: gamlss.dist
-Loading required package: nlme
-
-Attaching package: 'nlme'
-
-The following object is masked from 'package:dplyr':
-
-    collapse
-
-Loading required package: parallel
- **********   GAMLSS Version 5.4-22  ********** 
-For more on GAMLSS look at https://www.gamlss.com/
-Type gamlssNews() to see new features/changes/bug fixes.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocessing ---------------------------------</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>sivep <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../data/sivep.rds"</span>) <span class="co">#To get the incidence</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>sivep <span class="ot">&lt;-</span>  sivep <span class="sc">|&gt;</span> <span class="fu">filter</span>(MUN_RESI <span class="sc">==</span> <span class="dv">120033</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                          LOC_RESI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">49</span>,<span class="dv">50</span>,<span class="dv">67</span>,<span class="dv">68</span>, <span class="dv">69</span>, <span class="dv">86</span>))</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>cases <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">DT_EXAME =</span> <span class="fu">seq</span>(<span class="fu">min</span>(sivep<span class="sc">$</span>DT_EXAME), <span class="fu">max</span>(sivep<span class="sc">$</span>DT_EXAME), <span class="at">by =</span> <span class="st">"day"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(sivep <span class="sc">|&gt;</span> <span class="fu">group_by</span>(DT_EXAME) <span class="sc">|&gt;</span> <span class="fu">tally</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Joining with `by = join_by(DT_EXAME)`</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cases<span class="sc">$</span>n[<span class="fu">is.na</span>(cases<span class="sc">$</span>n)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>cases <span class="ot">&lt;-</span> cases <span class="sc">|&gt;</span> <span class="fu">filter</span>(DT_EXAME <span class="sc">&gt;=</span> <span class="fu">as.Date</span>(<span class="st">"2014-01-01"</span>), DT_EXAME <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2018-12-31"</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">n =</span> n<span class="sc">/</span><span class="fu">sum</span>(n))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df.model <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"outputs/duffy4_model3.rds"</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>df.model<span class="sc">$</span>riqueza_cat <span class="ot">&lt;-</span> <span class="fu">cut</span>(df.model<span class="sc">$</span>ind_riqueza,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">breaks =</span> <span class="fu">quantile</span>(df.model<span class="sc">$</span>ind_riqueza, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">1</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">include.lowest =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"Medium-low"</span>, <span class="st">"Medium-high"</span>, <span class="st">"High"</span>))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>df.model.full <span class="ot">&lt;-</span> df.model <span class="sc">|&gt;</span> <span class="fu">group_by</span>(idindiv) <span class="sc">|&gt;</span> </span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n.vivax =</span> <span class="fu">sum</span>(n.vivax), <span class="at">n.falciparum =</span> <span class="fu">sum</span>(n.falciparum), <span class="at">time.at.risk =</span> <span class="fu">sum</span>(time.at.risk)) <span class="sc">|&gt;</span> </span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"yr"</span>, <span class="st">"date.infection"</span>, <span class="st">"date.episode"</span>, <span class="st">"plasmodium.infection"</span>, <span class="st">"plasmodium.episode"</span>))</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>df.model.full<span class="sc">$</span>total.risk <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.model.full)){</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  total.risk <span class="ot">&lt;-</span> cases <span class="sc">|&gt;</span> <span class="fu">filter</span>(DT_EXAME <span class="sc">&gt;=</span> df.model.full<span class="sc">$</span>dt.min[i], DT_EXAME <span class="sc">&lt;=</span> df.model.full<span class="sc">$</span>dt.max[i]) <span class="sc">%&gt;%</span> .<span class="sc">$</span>n <span class="sc">|&gt;</span> <span class="fu">sum</span>()</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  df.model.full<span class="sc">$</span>total.risk[i] <span class="ot">&lt;-</span> total.risk</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.model.full <span class="sc">|&gt;</span> <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> <span class="fu">select</span>(n.vivax, house, riqueza_cat, sexo, age, darc_genotipo, total.risk)</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">age.bin =</span> <span class="fu">cut</span>(age, <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">18</span>, <span class="dv">40</span>, <span class="cn">Inf</span>)))</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>df.zinbi<span class="sc">$</span>age[df.zinbi<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">70</span>] <span class="ot">&lt;-</span> <span class="dv">70</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>I <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.zinbi), <span class="fu">nrow</span>(df.zinbi), <span class="at">replace =</span> F)</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi[I,]</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">duffy.positive =</span> (darc_genotipo <span class="sc">!=</span> <span class="st">"Fy/Fy"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="compare-the-two-current-best-models-using-gaic-and-vgd" class="level2">
-<h2 class="anchored" data-anchor-id="compare-the-two-current-best-models-using-gaic-and-vgd">Compare the two current best models using GAIC and VGD</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>partition <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">2</span>, <span class="fu">nrow</span>(df.zinbi), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.7</span>,<span class="fl">0.3</span>))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df.zinbi)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>base.fit <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(n.vivax <span class="sc">~</span> <span class="fu">log</span>(total.risk) <span class="sc">+</span> <span class="fu">pb</span>(age)<span class="sc">*</span>darc_genotipo <span class="sc">+</span> riqueza_cat <span class="sc">+</span> sexo,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">nu.formula =</span> <span class="sc">~</span> darc_genotipo <span class="sc">+</span> <span class="fu">pb</span>(age),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration 1: Global Deviance = 4865.224 
-GAMLSS-RS iteration 2: Global Deviance = 4841.934 
-GAMLSS-RS iteration 3: Global Deviance = 4836.074 
-GAMLSS-RS iteration 4: Global Deviance = 4834.9 
-GAMLSS-RS iteration 5: Global Deviance = 4835.89 
-GAMLSS-RS iteration 6: Global Deviance = 4837.177 
-GAMLSS-RS iteration 7: Global Deviance = 4838.109 
-GAMLSS-RS iteration 8: Global Deviance = 4838.648 
-GAMLSS-RS iteration 9: Global Deviance = 4838.892 
-GAMLSS-RS iteration 10: Global Deviance = 4839.004 
-GAMLSS-RS iteration 11: Global Deviance = 4839.054 
-GAMLSS-RS iteration 12: Global Deviance = 4839.076 
-GAMLSS-RS iteration 13: Global Deviance = 4839.087 
-GAMLSS-RS iteration 14: Global Deviance = 4839.092 
-GAMLSS-RS iteration 15: Global Deviance = 4839.093 
-GAMLSS-RS iteration 16: Global Deviance = 4839.095 
-GAMLSS-RS iteration 17: Global Deviance = 4839.096 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(base.fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>******************************************************************
-Family:  c("ZINBI", "Zero inflated negative binomial type I") 
-
-Call:  gamlss(formula = n.vivax ~ log(total.risk) + pb(age) *  
-    darc_genotipo + riqueza_cat + sexo, sigma.formula = ~1,  
-    nu.formula = ~darc_genotipo + pb(age), family = ZINBI(),  
-    data = df.zinbi, method = RS(500)) 
-
-Fitting method: RS(500) 
-
-------------------------------------------------------------------
-Mu link function:  log
-Mu Coefficients:
-                             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)                 0.9528208  0.1717820   5.547 3.37e-08 ***
-log(total.risk)             0.6754185  0.1088865   6.203 6.94e-10 ***
-pb(age)                     0.0241337  0.0045486   5.306 1.27e-07 ***
-darc_genotipoA/B            0.0448632  0.1925573   0.233   0.8158    
-darc_genotipoA/Fy          -0.0614354  0.2335833  -0.263   0.7926    
-darc_genotipoB/B            0.2280632  0.2224019   1.025   0.3053    
-darc_genotipoB/Fy           0.2537985  0.2216727   1.145   0.2524    
-darc_genotipoFy/Fy         -1.1553076  0.7179248  -1.609   0.1078    
-riqueza_catMedium-low      -0.1445040  0.0860926  -1.678   0.0934 .  
-riqueza_catMedium-high     -0.0573990  0.0849356  -0.676   0.4993    
-riqueza_catHigh            -0.1995474  0.0908713  -2.196   0.0282 *  
-sexoM                       0.0647320  0.0608424   1.064   0.2875    
-pb(age):darc_genotipoA/B   -0.0010620  0.0055016  -0.193   0.8470    
-pb(age):darc_genotipoA/Fy   0.0006469  0.0068544   0.094   0.9248    
-pb(age):darc_genotipoB/B   -0.0038568  0.0066200  -0.583   0.5602    
-pb(age):darc_genotipoB/Fy  -0.0088143  0.0064117  -1.375   0.1694    
-pb(age):darc_genotipoFy/Fy  0.0158118  0.0207392   0.762   0.4459    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-------------------------------------------------------------------
-Sigma link function:  log
-Sigma Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  -1.4013     0.1995  -7.025 3.08e-12 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-------------------------------------------------------------------
-Nu link function:  logit 
-Nu Coefficients:
-                    Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)        -0.559896   0.235696  -2.376   0.0176 *  
-darc_genotipoA/B   -0.067583   0.237868  -0.284   0.7764    
-darc_genotipoA/Fy   0.186751   0.262783   0.711   0.4774    
-darc_genotipoB/B    0.047625   0.261272   0.182   0.8554    
-darc_genotipoB/Fy   0.224107   0.266050   0.842   0.3997    
-darc_genotipoFy/Fy  2.191679   0.447969   4.892 1.09e-06 ***
-pb(age)            -0.002652   0.003745  -0.708   0.4789    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-------------------------------------------------------------------
-NOTE: Additive smoothing terms exist in the formulas: 
- i) Std. Error for smoothers are for the linear effect only. 
-ii) Std. Error for the linear terms maybe are not accurate. 
-------------------------------------------------------------------
-No. of observations in the fit:  1737 
-Degrees of Freedom for the fit:  30.75878
-      Residual Deg. of Freedom:  1706.241 
-                      at cycle:  17 
- 
-Global Deviance:     4839.096 
-            AIC:     4900.614 
-            SBC:     5068.554 
-******************************************************************</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">duffy.positive =</span> (darc_genotipo <span class="sc">!=</span> <span class="st">"Fy/Fy"</span>))</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fit.rodrigo <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(n.vivax <span class="sc">~</span> <span class="fu">exp</span>(total.risk) <span class="sc">+</span> age.bin<span class="sc">*</span>darc_genotipo <span class="sc">+</span> riqueza_cat <span class="sc">+</span> sexo,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nu.formula =</span> <span class="sc">~</span> duffy.positive <span class="sc">+</span> <span class="fu">exp</span>(total.risk),</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GAMLSS-RS iteration 1: Global Deviance = 4929.975 
-GAMLSS-RS iteration 2: Global Deviance = 4912.316 
-GAMLSS-RS iteration 3: Global Deviance = 4914.605 
-GAMLSS-RS iteration 4: Global Deviance = 4917.104 
-GAMLSS-RS iteration 5: Global Deviance = 4919.542 
-GAMLSS-RS iteration 6: Global Deviance = 4921.821 
-GAMLSS-RS iteration 7: Global Deviance = 4923.845 
-GAMLSS-RS iteration 8: Global Deviance = 4925.546 
-GAMLSS-RS iteration 9: Global Deviance = 4926.892 
-GAMLSS-RS iteration 10: Global Deviance = 4927.903 
-GAMLSS-RS iteration 11: Global Deviance = 4928.619 
-GAMLSS-RS iteration 12: Global Deviance = 4929.107 
-GAMLSS-RS iteration 13: Global Deviance = 4929.426 
-GAMLSS-RS iteration 14: Global Deviance = 4929.648 
-GAMLSS-RS iteration 15: Global Deviance = 4929.777 
-GAMLSS-RS iteration 16: Global Deviance = 4929.875 
-GAMLSS-RS iteration 17: Global Deviance = 4929.94 
-GAMLSS-RS iteration 18: Global Deviance = 4929.982 
-GAMLSS-RS iteration 19: Global Deviance = 4930.009 
-GAMLSS-RS iteration 20: Global Deviance = 4930.027 
-GAMLSS-RS iteration 21: Global Deviance = 4930.038 
-GAMLSS-RS iteration 22: Global Deviance = 4930.047 
-GAMLSS-RS iteration 23: Global Deviance = 4930.051 
-GAMLSS-RS iteration 24: Global Deviance = 4930.054 
-GAMLSS-RS iteration 25: Global Deviance = 4930.056 
-GAMLSS-RS iteration 26: Global Deviance = 4930.058 
-GAMLSS-RS iteration 27: Global Deviance = 4930.059 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit.rodrigo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in summary.gamlss(fit.rodrigo): summary: vcov has failed, option qr is used instead</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>******************************************************************
-Family:  c("ZINBI", "Zero inflated negative binomial type I") 
-
-Call:  gamlss(formula = n.vivax ~ exp(total.risk) + age.bin * darc_genotipo +  
-    riqueza_cat + sexo, sigma.formula = ~1, nu.formula = ~duffy.positive +  
-    exp(total.risk), family = ZINBI(), data = df.zinbi, method = RS(500)) 
-
-Fitting method: RS(500) 
-
-------------------------------------------------------------------
-Mu link function:  log
-Mu Coefficients:
-                                     Estimate Std. Error t value Pr(&gt;|t|)   
-(Intercept)                         -1.249284   0.588155  -2.124  0.03381 * 
-exp(total.risk)                      0.551837   0.210004   2.628  0.00867 **
-age.bin(18,40]                       0.445191   0.221638   2.009  0.04473 * 
-age.bin(40, Inf]                    -0.004551   0.257220  -0.018  0.98588   
-darc_genotipoA/B                     0.233523   0.204987   1.139  0.25477   
-darc_genotipoA/Fy                   -0.108339   0.223448  -0.485  0.62785   
-darc_genotipoB/B                     0.250577   0.214948   1.166  0.24388   
-darc_genotipoB/Fy                    0.301532   0.221038   1.364  0.17270   
-darc_genotipoFy/Fy                  -0.974534   1.290464  -0.755  0.45024   
-riqueza_catMedium-low               -0.243023   0.111076  -2.188  0.02881 * 
-riqueza_catMedium-high              -0.123776   0.109633  -1.129  0.25905   
-riqueza_catHigh                     -0.321013   0.109338  -2.936  0.00337 **
-sexoM                                0.089406   0.077756   1.150  0.25037   
-age.bin(18,40]:darc_genotipoA/B     -0.272881   0.276400  -0.987  0.32365   
-age.bin(40, Inf]:darc_genotipoA/B   -0.104475   0.304134  -0.344  0.73125   
-age.bin(18,40]:darc_genotipoA/Fy     0.076422   0.314683   0.243  0.80815   
-age.bin(40, Inf]:darc_genotipoA/Fy   0.039664   0.338433   0.117  0.90672   
-age.bin(18,40]:darc_genotipoB/B     -0.041959   0.311018  -0.135  0.89270   
-age.bin(40, Inf]:darc_genotipoB/B   -0.192802   0.341694  -0.564  0.57266   
-age.bin(18,40]:darc_genotipoB/Fy    -0.612885   0.309658  -1.979  0.04795 * 
-age.bin(40, Inf]:darc_genotipoB/Fy  -0.316143   0.346092  -0.913  0.36113   
-age.bin(18,40]:darc_genotipoFy/Fy    0.171314   1.470242   0.117  0.90725   
-age.bin(40, Inf]:darc_genotipoFy/Fy  0.644970   1.626752   0.396  0.69180   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-------------------------------------------------------------------
-Sigma link function:  log
-Sigma Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)
-(Intercept)  0.03305    0.08529   0.387    0.698
-
-------------------------------------------------------------------
-Nu link function:  logit 
-Nu Coefficients:
-                   Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)          8.0175     0.9660   8.300  &lt; 2e-16 ***
-duffy.positiveTRUE  -3.6972     0.5052  -7.319 3.81e-13 ***
-exp(total.risk)     -2.6760     0.3576  -7.482 1.15e-13 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-------------------------------------------------------------------
-No. of observations in the fit:  1737 
-Degrees of Freedom for the fit:  27
-      Residual Deg. of Freedom:  1710 
-                      at cycle:  27 
- 
-Global Deviance:     4930.059 
-            AIC:     4984.059 
-            SBC:     5131.476 
-******************************************************************</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(base.fit, fit.rodrigo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                  df      AIC
-base.fit    30.75878 4900.614
-fit.rodrigo 27.00000 4984.059</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(base.fit, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="negbin_vgd_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(base.fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in wp(base.fit): Some points are missed out 
-increase the y limits using ylim.all</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="negbin_vgd_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(fit.rodrigo, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="negbin_vgd_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(fit.rodrigo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in wp(fit.rodrigo): Some points are missed out 
-increase the y limits using ylim.all</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="negbin_vgd_files/figure-html/unnamed-chunk-2-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Now with VGD</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>base.fit.vgd <span class="ot">&lt;-</span> <span class="fu">gamlssVGD</span>(n.vivax <span class="sc">~</span> <span class="fu">log</span>(total.risk) <span class="sc">+</span> <span class="fu">pb</span>(age)<span class="sc">*</span>darc_genotipo <span class="sc">+</span> riqueza_cat <span class="sc">+</span> sexo,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">nu.formula =</span> <span class="sc">~</span> darc_genotipo <span class="sc">+</span> <span class="fu">pb</span>(age),</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">rand =</span> partition,</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fit.rodrigo.vgd <span class="ot">&lt;-</span> <span class="fu">gamlssVGD</span>(n.vivax <span class="sc">~</span> <span class="fu">exp</span>(total.risk) <span class="sc">+</span> age.bin<span class="sc">*</span>darc_genotipo <span class="sc">+</span> riqueza_cat <span class="sc">+</span> sexo,</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nu.formula =</span> <span class="sc">~</span> duffy.positive <span class="sc">+</span> <span class="fu">exp</span>(total.risk),</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">rand =</span> partition,</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">VGD</span>(base.fit.vgd, fit.rodrigo.vgd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                 Pred.GD
-base.fit.vgd    1458.397
-fit.rodrigo.vgd 1476.811</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gamlss)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Preprocessing ---------------------------------</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sivep <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../data/sivep.rds"</span>) <span class="co">#To get the incidence</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>sivep <span class="ot">&lt;-</span>  sivep <span class="sc">|&gt;</span> <span class="fu">filter</span>(MUN_RESI <span class="sc">==</span> <span class="dv">120033</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                          LOC_RESI <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">49</span>,<span class="dv">50</span>,<span class="dv">67</span>,<span class="dv">68</span>, <span class="dv">69</span>, <span class="dv">86</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>cases <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">DT_EXAME =</span> <span class="fu">seq</span>(<span class="fu">min</span>(sivep<span class="sc">$</span>DT_EXAME), <span class="fu">max</span>(sivep<span class="sc">$</span>DT_EXAME), <span class="at">by =</span> <span class="st">"day"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(sivep <span class="sc">|&gt;</span> <span class="fu">group_by</span>(DT_EXAME) <span class="sc">|&gt;</span> <span class="fu">tally</span>())</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>cases<span class="sc">$</span>n[<span class="fu">is.na</span>(cases<span class="sc">$</span>n)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>cases <span class="ot">&lt;-</span> cases <span class="sc">|&gt;</span> <span class="fu">filter</span>(DT_EXAME <span class="sc">&gt;=</span> <span class="fu">as.Date</span>(<span class="st">"2014-01-01"</span>), DT_EXAME <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">"2018-12-31"</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">n =</span> n<span class="sc">/</span><span class="fu">sum</span>(n))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>df.model <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"outputs/duffy4_model3.rds"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>df.model<span class="sc">$</span>riqueza_cat <span class="ot">&lt;-</span> <span class="fu">cut</span>(df.model<span class="sc">$</span>ind_riqueza,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                            <span class="at">breaks =</span> <span class="fu">quantile</span>(df.model<span class="sc">$</span>ind_riqueza, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="dv">1</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                            <span class="at">include.lowest =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>                            <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"Medium-low"</span>, <span class="st">"Medium-high"</span>, <span class="st">"High"</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>df.model.full <span class="ot">&lt;-</span> df.model <span class="sc">|&gt;</span> <span class="fu">group_by</span>(idindiv) <span class="sc">|&gt;</span> </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n.vivax =</span> <span class="fu">sum</span>(n.vivax), <span class="at">n.falciparum =</span> <span class="fu">sum</span>(n.falciparum), <span class="at">time.at.risk =</span> <span class="fu">sum</span>(time.at.risk)) <span class="sc">|&gt;</span> </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"yr"</span>, <span class="st">"date.infection"</span>, <span class="st">"date.episode"</span>, <span class="st">"plasmodium.infection"</span>, <span class="st">"plasmodium.episode"</span>))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>df.model.full<span class="sc">$</span>total.risk <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.model.full)){</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  total.risk <span class="ot">&lt;-</span> cases <span class="sc">|&gt;</span> <span class="fu">filter</span>(DT_EXAME <span class="sc">&gt;=</span> df.model.full<span class="sc">$</span>dt.min[i], DT_EXAME <span class="sc">&lt;=</span> df.model.full<span class="sc">$</span>dt.max[i]) <span class="sc">%&gt;%</span> .<span class="sc">$</span>n <span class="sc">|&gt;</span> <span class="fu">sum</span>()</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  df.model.full<span class="sc">$</span>total.risk[i] <span class="ot">&lt;-</span> total.risk</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.model.full <span class="sc">|&gt;</span> <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> <span class="fu">select</span>(n.vivax, house, riqueza_cat, sexo, age, darc_genotipo, total.risk)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">age.bin =</span> <span class="fu">cut</span>(age, <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">18</span>, <span class="dv">40</span>, <span class="cn">Inf</span>)))</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>df.zinbi<span class="sc">$</span>age[df.zinbi<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">70</span>] <span class="ot">&lt;-</span> <span class="dv">70</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>I <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.zinbi), <span class="fu">nrow</span>(df.zinbi), <span class="at">replace =</span> F)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi[I,]</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> df.zinbi <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">duffy.positive =</span> (darc_genotipo <span class="sc">!=</span> <span class="st">"Fy/Fy"</span>))</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>partition <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">2</span>, <span class="fu">nrow</span>(df.zinbi), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.7</span>,<span class="fl">0.3</span>))</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>df.zinbi <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="search-for-the-best-model-using-discrete-age-groups" class="level2">
 <h2 class="anchored" data-anchor-id="search-for-the-best-model-using-discrete-age-groups">Search for the best model (using discrete age groups)</h2>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mu.formula.prefix <span class="ot">&lt;-</span> <span class="st">"n.vivax ~ age.bin*darc_genotipo + riqueza_cat + sexo"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mu.candidate <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"+ log(total.risk)"</span>, <span class="st">"+ total.risk"</span>, <span class="st">"+ exp(total.risk)"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>nu.candidate <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"+ log(total.risk)"</span>, <span class="st">"+ total.risk"</span>, <span class="st">"+ exp(total.risk)"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>nu.candidate.age <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"+ age.bin"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>nu.candidate.genotype <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"darc_genotipo "</span>, <span class="st">"duffy.positive "</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>model.fit <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(mu.suffix <span class="cf">in</span> mu.candidate){</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(nu.suffix <span class="cf">in</span> nu.candidate){</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(nu.suffix.age <span class="cf">in</span> nu.candidate.age){</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(nu.suffix.genotype <span class="cf">in</span> nu.candidate.genotype){</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        label <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"mu: "</span>, mu.suffix, <span class="st">"; nu: "</span>, nu.suffix.genotype, nu.suffix, nu.suffix.age)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        mu.formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste0</span>(mu.formula.prefix, mu.suffix))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        nu.formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste0</span>(<span class="st">"~ "</span>, nu.suffix.genotype, nu.suffix, nu.suffix.age))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        model.fit[[label]] <span class="ot">&lt;-</span> <span class="fu">gamlssVGD</span>(mu.formula,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">nu.formula =</span> nu.formula,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                        <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                        <span class="at">rand =</span> partition,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                        <span class="at">data =</span> df.zinbi)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>VGD.comp <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(model.fit), <span class="cf">function</span>(x) <span class="fu">VGD</span>(model.fit[[x]]))</span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(VGD.comp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>VGD.comp <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(model.fit), <span class="cf">function</span>(x) <span class="fu">VGD</span>(model.fit[[x]]))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(VGD.comp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>mu: + log(total.risk); nu: duffy.positive + exp(total.risk)+ age.bin 
-                                                            1465.810 
+                                                            1465.814 
      mu: + log(total.risk); nu: duffy.positive + total.risk+ age.bin 
-                                                            1466.273 
+                                                            1466.280 
      mu: + total.risk; nu: duffy.positive + exp(total.risk)+ age.bin 
                                                             1466.427 
           mu: + total.risk; nu: duffy.positive + total.risk+ age.bin 
-                                                            1466.458 
+                                                            1466.456 
 mu: + exp(total.risk); nu: duffy.positive + log(total.risk)+ age.bin 
                                                             1466.508 
      mu: + exp(total.risk); nu: duffy.positive + total.risk+ age.bin 
-                                                            1466.523 
+                                                            1466.524 
 mu: + exp(total.risk); nu: duffy.positive + exp(total.risk)+ age.bin 
                                                             1466.620 
      mu: + total.risk; nu: duffy.positive + log(total.risk)+ age.bin 
@@ -793,7 +234,7 @@ mu: + log(total.risk); nu: duffy.positive + log(total.risk)+ age.bin
               mu: + total.risk; nu: duffy.positive + exp(total.risk) 
                                                             1476.546 
                           mu: + exp(total.risk); nu: duffy.positive  
-                                                            1476.637 
+                                                            1476.633 
               mu: + log(total.risk); nu: duffy.positive + total.risk 
                                                             1476.659 
                mu: + log(total.risk); nu: darc_genotipo + total.risk 
@@ -829,425 +270,155 @@ mu: + log(total.risk); nu: duffy.positive + log(total.risk)+ age.bin
          mu: + log(total.risk); nu: duffy.positive + log(total.risk) 
                                                             1480.686 
                           mu: + log(total.risk); nu: duffy.positive  
-                                                            1481.038 
+                                                            1481.015 
                            mu: + exp(total.risk); nu: darc_genotipo  
                                                             1481.694 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>best.model <span class="ot">&lt;-</span> model.fit[[<span class="fu">names</span>(model.fit)[<span class="fu">which.min</span>(VGD.comp)]]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>best.model <span class="ot">&lt;-</span> model.fit[[<span class="fu">names</span>(model.fit)[<span class="fu">which.min</span>(VGD.comp)]]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="repeat-but-using-splines" class="level2">
 <h2 class="anchored" data-anchor-id="repeat-but-using-splines">Repeat but using splines</h2>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in RS(500): Algorithm RS has not yet converged</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in RS(500): Algorithm RS has not yet converged</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "sigma", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, data = DatA, what = "nu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- 
-Warning in predict.gamlss(object, newdata = newdata, what = "mu", type = type, : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb121"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a>VGD.comp.spline <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(model.fit.spline), <span class="cf">function</span>(x) <span class="fu">VGD</span>(model.fit.spline[[x]]))</span>
-<span id="cb121-2"><a href="#cb121-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(VGD.comp.spline))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>VGD.comp.spline <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">names</span>(model.fit.spline), <span class="cf">function</span>(x) <span class="fu">VGD</span>(model.fit.spline[[x]]))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sort</span>(VGD.comp.spline))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                 mu: + log(total.risk); nu: + pb(age) 
-                                             1450.571 
-                      mu: + total.risk; nu: + pb(age) 
-                                             1451.882 
-                 mu: + exp(total.risk); nu: + pb(age) 
-                                             1453.215 
-mu: + log(total.risk); nu: + exp(total.risk)+ pb(age) 
-                                             1455.995 
-     mu: + total.risk; nu: + exp(total.risk)+ pb(age) 
-                                             1456.158 
-mu: + exp(total.risk); nu: + exp(total.risk)+ pb(age) 
-                                             1456.163 
-     mu: + exp(total.risk); nu: + total.risk+ pb(age) 
-                                             1456.394 
-          mu: + total.risk; nu: + total.risk+ pb(age) 
-                                             1456.640 
-     mu: + log(total.risk); nu: + total.risk+ pb(age) 
-                                             1456.970 
-mu: + exp(total.risk); nu: + log(total.risk)+ pb(age) 
-                                             1456.995 
-     mu: + total.risk; nu: + log(total.risk)+ pb(age) 
-                                             1457.713 
-mu: + log(total.risk); nu: + log(total.risk)+ pb(age) 
-                                             1459.836 
-         mu: + log(total.risk); nu: + exp(total.risk) 
-                                             1462.635 
-              mu: + log(total.risk); nu: + total.risk 
-                                             1463.787 
-              mu: + total.risk; nu: + exp(total.risk) 
-                                             1464.091 
-         mu: + exp(total.risk); nu: + exp(total.risk) 
-                                             1464.475 
-                   mu: + total.risk; nu: + total.risk 
-                                             1464.856 
-              mu: + exp(total.risk); nu: + total.risk 
-                                             1465.134 
-              mu: + total.risk; nu: + log(total.risk) 
-                                             1468.375 
-         mu: + exp(total.risk); nu: + log(total.risk) 
-                                             1468.433 
-         mu: + log(total.risk); nu: + log(total.risk) 
-                                             1468.631 
-                          mu: + log(total.risk); nu:  
-                                             1468.820 
-                               mu: + total.risk; nu:  
-                                             1471.747 
-                          mu: + exp(total.risk); nu:  
-                                             1473.196 </code></pre>
+<pre><code>                 mu: + log(total.risk); nu: duffy.positive + pb(age) 
+                                                            1450.571 
+ mu: + log(total.risk); nu: darc_genotipo + exp(total.risk)+ pb(age) 
+                                                            1451.758 
+                      mu: + total.risk; nu: duffy.positive + pb(age) 
+                                                            1451.882 
+      mu: + log(total.risk); nu: darc_genotipo + total.risk+ pb(age) 
+                                                            1452.351 
+      mu: + total.risk; nu: darc_genotipo + exp(total.risk)+ pb(age) 
+                                                            1452.795 
+           mu: + total.risk; nu: darc_genotipo + total.risk+ pb(age) 
+                                                            1453.128 
+                 mu: + exp(total.risk); nu: duffy.positive + pb(age) 
+                                                            1453.215 
+ mu: + exp(total.risk); nu: darc_genotipo + exp(total.risk)+ pb(age) 
+                                                            1453.242 
+      mu: + exp(total.risk); nu: darc_genotipo + total.risk+ pb(age) 
+                                                            1453.516 
+      mu: + total.risk; nu: darc_genotipo + log(total.risk)+ pb(age) 
+                                                            1454.398 
+ mu: + log(total.risk); nu: darc_genotipo + log(total.risk)+ pb(age) 
+                                                            1454.427 
+ mu: + exp(total.risk); nu: darc_genotipo + log(total.risk)+ pb(age) 
+                                                            1454.667 
+mu: + log(total.risk); nu: duffy.positive + exp(total.risk)+ pb(age) 
+                                                            1455.995 
+     mu: + total.risk; nu: duffy.positive + exp(total.risk)+ pb(age) 
+                                                            1456.158 
+mu: + exp(total.risk); nu: duffy.positive + exp(total.risk)+ pb(age) 
+                                                            1456.163 
+     mu: + exp(total.risk); nu: duffy.positive + total.risk+ pb(age) 
+                                                            1456.394 
+                       mu: + total.risk; nu: darc_genotipo + pb(age) 
+                                                            1456.517 
+          mu: + total.risk; nu: duffy.positive + total.risk+ pb(age) 
+                                                            1456.640 
+     mu: + log(total.risk); nu: duffy.positive + total.risk+ pb(age) 
+                                                            1456.970 
+mu: + exp(total.risk); nu: duffy.positive + log(total.risk)+ pb(age) 
+                                                            1456.995 
+     mu: + total.risk; nu: duffy.positive + log(total.risk)+ pb(age) 
+                                                            1457.713 
+                  mu: + log(total.risk); nu: darc_genotipo + pb(age) 
+                                                            1458.397 
+mu: + log(total.risk); nu: duffy.positive + log(total.risk)+ pb(age) 
+                                                            1459.836 
+                  mu: + exp(total.risk); nu: darc_genotipo + pb(age) 
+                                                            1462.307 
+         mu: + log(total.risk); nu: duffy.positive + exp(total.risk) 
+                                                            1462.635 
+              mu: + log(total.risk); nu: duffy.positive + total.risk 
+                                                            1463.786 
+              mu: + total.risk; nu: duffy.positive + exp(total.risk) 
+                                                            1464.091 
+         mu: + exp(total.risk); nu: duffy.positive + exp(total.risk) 
+                                                            1464.475 
+                   mu: + total.risk; nu: duffy.positive + total.risk 
+                                                            1464.856 
+              mu: + exp(total.risk); nu: duffy.positive + total.risk 
+                                                            1465.134 
+                           mu: + exp(total.risk); nu: darc_genotipo  
+                                                            1467.684 
+              mu: + total.risk; nu: duffy.positive + log(total.risk) 
+                                                            1468.375 
+         mu: + exp(total.risk); nu: duffy.positive + log(total.risk) 
+                                                            1468.432 
+         mu: + log(total.risk); nu: duffy.positive + log(total.risk) 
+                                                            1468.631 
+                          mu: + log(total.risk); nu: duffy.positive  
+                                                            1468.820 
+                           mu: + log(total.risk); nu: darc_genotipo  
+                                                            1469.484 
+                               mu: + total.risk; nu: duffy.positive  
+                                                            1471.747 
+                                mu: + total.risk; nu: darc_genotipo  
+                                                            1472.993 
+                          mu: + exp(total.risk); nu: duffy.positive  
+                                                            1473.196 
+          mu: + log(total.risk); nu: darc_genotipo + exp(total.risk) 
+                                                            1480.224 
+               mu: + log(total.risk); nu: darc_genotipo + total.risk 
+                                                            1481.740 
+               mu: + total.risk; nu: darc_genotipo + exp(total.risk) 
+                                                            1482.569 
+          mu: + exp(total.risk); nu: darc_genotipo + exp(total.risk) 
+                                                            1483.279 
+                    mu: + total.risk; nu: darc_genotipo + total.risk 
+                                                            1483.824 
+               mu: + exp(total.risk); nu: darc_genotipo + total.risk 
+                                                            1484.485 
+          mu: + log(total.risk); nu: darc_genotipo + log(total.risk) 
+                                                            1484.996 
+               mu: + total.risk; nu: darc_genotipo + log(total.risk) 
+                                                            1485.508 
+          mu: + exp(total.risk); nu: darc_genotipo + log(total.risk) 
+                                                            1485.782 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb123"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a>best.model.spline <span class="ot">&lt;-</span> model.fit.spline[[<span class="fu">names</span>(model.fit.spline)[<span class="fu">which.min</span>(VGD.comp.spline)]]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>best.model.spline <span class="ot">&lt;-</span> model.fit.spline[[<span class="fu">names</span>(model.fit.spline)[<span class="fu">which.min</span>(VGD.comp.spline)]]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-best-models" class="level2">
+<h2 class="anchored" data-anchor-id="the-best-models">The best models:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best.model<span class="sc">$</span>mu.formula)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n.vivax ~ age.bin * darc_genotipo + riqueza_cat + sexo + log(total.risk)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best.model<span class="sc">$</span>nu.formula)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>~duffy.positive + exp(total.risk) + age.bin</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best.model.spline<span class="sc">$</span>mu.formula)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n.vivax ~ pb(age) * darc_genotipo + riqueza_cat + sexo + log(total.risk)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best.model.spline<span class="sc">$</span>nu.formula)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>~duffy.positive + pb(age)</code></pre>
+</div>
 </div>
 </section>
 <section id="to-spline-or-not-to-spline-thats-the-question" class="level2">
 <h2 class="anchored" data-anchor-id="to-spline-or-not-to-spline-thats-the-question">To spline or not to spline? That’s the question</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="fu">VGD</span>(best.model.spline, best.model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">VGD</span>(best.model.spline, best.model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   Pred.GD
 best.model.spline 1450.571
-best.model        1465.810</code></pre>
+best.model        1465.814</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb126"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a>best.model.full <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(best.model<span class="sc">$</span>mu.formula,</span>
-<span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb126-3"><a href="#cb126-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">nu.formula =</span> best.model<span class="sc">$</span>nu.formula,</span>
-<span id="cb126-4"><a href="#cb126-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb126-5"><a href="#cb126-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb126-6"><a href="#cb126-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>best.model.full <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(best.model<span class="sc">$</span>mu.formula,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">nu.formula =</span> best.model<span class="sc">$</span>nu.formula,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration 1: Global Deviance = 4916.004 
 GAMLSS-RS iteration 2: Global Deviance = 4891.461 
@@ -1274,35 +445,35 @@ GAMLSS-RS iteration 22: Global Deviance = 4894.993
 GAMLSS-RS iteration 23: Global Deviance = 4895.015 
 GAMLSS-RS iteration 24: Global Deviance = 4895.034 
 GAMLSS-RS iteration 25: Global Deviance = 4895.044 
-GAMLSS-RS iteration 26: Global Deviance = 4895.058 
-GAMLSS-RS iteration 27: Global Deviance = 4895.069 
-GAMLSS-RS iteration 28: Global Deviance = 4895.08 
-GAMLSS-RS iteration 29: Global Deviance = 4895.095 
-GAMLSS-RS iteration 30: Global Deviance = 4895.101 
-GAMLSS-RS iteration 31: Global Deviance = 4895.058 
-GAMLSS-RS iteration 32: Global Deviance = 4895.102 
-GAMLSS-RS iteration 33: Global Deviance = 4895.112 
-GAMLSS-RS iteration 34: Global Deviance = 4895.114 
-GAMLSS-RS iteration 35: Global Deviance = 4895.117 
-GAMLSS-RS iteration 36: Global Deviance = 4895.109 
-GAMLSS-RS iteration 37: Global Deviance = 4895.113 
-GAMLSS-RS iteration 38: Global Deviance = 4895.119 
-GAMLSS-RS iteration 39: Global Deviance = 4895.122 
-GAMLSS-RS iteration 40: Global Deviance = 4895.124 
-GAMLSS-RS iteration 41: Global Deviance = 4895.11 
-GAMLSS-RS iteration 42: Global Deviance = 4895.117 
-GAMLSS-RS iteration 43: Global Deviance = 4895.111 
-GAMLSS-RS iteration 44: Global Deviance = 4895.115 
-GAMLSS-RS iteration 45: Global Deviance = 4895.118 
-GAMLSS-RS iteration 46: Global Deviance = 4895.119 
-GAMLSS-RS iteration 47: Global Deviance = 4895.119 </code></pre>
+GAMLSS-RS iteration 26: Global Deviance = 4895.057 
+GAMLSS-RS iteration 27: Global Deviance = 4895.072 
+GAMLSS-RS iteration 28: Global Deviance = 4895.084 
+GAMLSS-RS iteration 29: Global Deviance = 4895.091 
+GAMLSS-RS iteration 30: Global Deviance = 4895.098 
+GAMLSS-RS iteration 31: Global Deviance = 4895.103 
+GAMLSS-RS iteration 32: Global Deviance = 4895.041 
+GAMLSS-RS iteration 33: Global Deviance = 4895.086 
+GAMLSS-RS iteration 34: Global Deviance = 4895.091 
+GAMLSS-RS iteration 35: Global Deviance = 4895.096 
+GAMLSS-RS iteration 36: Global Deviance = 4895.1 
+GAMLSS-RS iteration 37: Global Deviance = 4895.104 
+GAMLSS-RS iteration 38: Global Deviance = 4895.106 
+GAMLSS-RS iteration 39: Global Deviance = 4895.117 
+GAMLSS-RS iteration 40: Global Deviance = 4895.12 
+GAMLSS-RS iteration 41: Global Deviance = 4895.058 
+GAMLSS-RS iteration 42: Global Deviance = 4895.099 
+GAMLSS-RS iteration 43: Global Deviance = 4895.102 
+GAMLSS-RS iteration 44: Global Deviance = 4895.105 
+GAMLSS-RS iteration 45: Global Deviance = 4895.106 
+GAMLSS-RS iteration 46: Global Deviance = 4895.107 
+GAMLSS-RS iteration 47: Global Deviance = 4895.107 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb128"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>best.model.spline.full <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(best.model.spline<span class="sc">$</span>mu.formula,</span>
-<span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">nu.formula =</span> best.model.spline<span class="sc">$</span>nu.formula,</span>
-<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
-<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>best.model.spline.full <span class="ot">&lt;-</span> <span class="fu">gamlss</span>(best.model.spline<span class="sc">$</span>mu.formula,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">sigma.formula =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">nu.formula =</span> best.model.spline<span class="sc">$</span>nu.formula,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">family =</span> <span class="fu">ZINBI</span>(), </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">method =</span> <span class="fu">RS</span>(<span class="dv">500</span>),</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">data =</span> df.zinbi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GAMLSS-RS iteration 1: Global Deviance = 4866.024 
 GAMLSS-RS iteration 2: Global Deviance = 4841.953 
@@ -1325,7 +496,7 @@ GAMLSS-RS iteration 18: Global Deviance = 4839.041
 GAMLSS-RS iteration 19: Global Deviance = 4839.042 
 GAMLSS-RS iteration 20: Global Deviance = 4839.042 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb130"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best.model.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best.model.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>******************************************************************
 Family:  c("ZINBI", "Zero inflated negative binomial type I") 
@@ -1340,29 +511,29 @@ Fitting method: RS(500)
 Mu link function:  log
 Mu Coefficients:
                                     Estimate Std. Error t value Pr(&gt;|t|)   
-(Intercept)                          0.45724    0.21962   2.082  0.03750 * 
-age.bin(18,40]                       0.24070    0.21975   1.095  0.27352   
-age.bin(40, Inf]                    -0.04445    0.25591  -0.174  0.86212   
-darc_genotipoA/B                     0.19082    0.19906   0.959  0.33790   
-darc_genotipoA/Fy                   -0.08598    0.22670  -0.379  0.70452   
-darc_genotipoB/B                     0.24057    0.22424   1.073  0.28350   
-darc_genotipoB/Fy                    0.28785    0.23136   1.244  0.21361   
-darc_genotipoFy/Fy                  -0.81020    0.82408  -0.983  0.32567   
-riqueza_catMedium-low               -0.19875    0.09961  -1.995  0.04618 * 
-riqueza_catMedium-high              -0.09830    0.09867  -0.996  0.31928   
-riqueza_catHigh                     -0.27684    0.10205  -2.713  0.00674 **
-sexoM                                0.09406    0.06969   1.350  0.17730   
-log(total.risk)                      0.39135    0.17483   2.238  0.02532 * 
-age.bin(18,40]:darc_genotipoA/B     -0.25252    0.25353  -0.996  0.31939   
-age.bin(40, Inf]:darc_genotipoA/B   -0.02135    0.29684  -0.072  0.94267   
-age.bin(18,40]:darc_genotipoA/Fy     0.03368    0.28869   0.117  0.90713   
-age.bin(40, Inf]:darc_genotipoA/Fy   0.07888    0.34056   0.232  0.81685   
-age.bin(18,40]:darc_genotipoB/B     -0.05644    0.28391  -0.199  0.84246   
-age.bin(40, Inf]:darc_genotipoB/B   -0.13568    0.34320  -0.395  0.69265   
-age.bin(18,40]:darc_genotipoB/Fy    -0.62015    0.29515  -2.101  0.03577 * 
-age.bin(40, Inf]:darc_genotipoB/Fy  -0.26275    0.33980  -0.773  0.43948   
-age.bin(18,40]:darc_genotipoFy/Fy   -0.12568    0.93189  -0.135  0.89273   
-age.bin(40, Inf]:darc_genotipoFy/Fy  0.77754    1.02985   0.755  0.45035   
+(Intercept)                          0.45733    0.21956   2.083  0.03741 * 
+age.bin(18,40]                       0.24063    0.21975   1.095  0.27366   
+age.bin(40, Inf]                    -0.04461    0.25591  -0.174  0.86163   
+darc_genotipoA/B                     0.19079    0.19906   0.958  0.33798   
+darc_genotipoA/Fy                   -0.08610    0.22669  -0.380  0.70413   
+darc_genotipoB/B                     0.24051    0.22424   1.073  0.28362   
+darc_genotipoB/Fy                    0.28766    0.23135   1.243  0.21389   
+darc_genotipoFy/Fy                  -0.81582    0.82429  -0.990  0.32245   
+riqueza_catMedium-low               -0.19873    0.09961  -1.995  0.04618 * 
+riqueza_catMedium-high              -0.09823    0.09867  -0.996  0.31961   
+riqueza_catHigh                     -0.27671    0.10204  -2.712  0.00676 **
+sexoM                                0.09404    0.06968   1.350  0.17733   
+log(total.risk)                      0.38901    0.17487   2.225  0.02624 * 
+age.bin(18,40]:darc_genotipoA/B     -0.25249    0.25353  -0.996  0.31944   
+age.bin(40, Inf]:darc_genotipoA/B   -0.02118    0.29683  -0.071  0.94312   
+age.bin(18,40]:darc_genotipoA/Fy     0.03381    0.28869   0.117  0.90677   
+age.bin(40, Inf]:darc_genotipoA/Fy   0.07916    0.34055   0.232  0.81622   
+age.bin(18,40]:darc_genotipoB/B     -0.05639    0.28391  -0.199  0.84258   
+age.bin(40, Inf]:darc_genotipoB/B   -0.13547    0.34320  -0.395  0.69309   
+age.bin(18,40]:darc_genotipoB/Fy    -0.62008    0.29513  -2.101  0.03579 * 
+age.bin(40, Inf]:darc_genotipoB/Fy  -0.26247    0.33980  -0.772  0.43997   
+age.bin(18,40]:darc_genotipoFy/Fy   -0.12278    0.93150  -0.132  0.89515   
+age.bin(40, Inf]:darc_genotipoFy/Fy  0.73303    1.02894   0.712  0.47631   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1370,17 +541,17 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Sigma link function:  log
 Sigma Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)
-(Intercept)  -0.3674     0.3734  -0.984    0.325
+(Intercept)  -0.3677     0.3732  -0.985    0.325
 
 ------------------------------------------------------------------
 Nu link function:  logit 
 Nu Coefficients:
                    Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)         6.99624    1.60408   4.362 1.37e-05 ***
-duffy.positiveTRUE -2.89395    0.85993  -3.365 0.000781 ***
-exp(total.risk)    -1.94300    0.51553  -3.769 0.000170 ***
-age.bin(18,40]     -1.37070    0.74141  -1.849 0.064661 .  
-age.bin(40, Inf]    0.08817    0.31538   0.280 0.779849    
+(Intercept)         6.99562    1.60447   4.360 1.38e-05 ***
+duffy.positiveTRUE -2.89357    0.86169  -3.358 0.000802 ***
+exp(total.risk)    -1.94277    0.51502  -3.772 0.000167 ***
+age.bin(18,40]     -1.37043    0.74092  -1.850 0.064541 .  
+age.bin(40, Inf]    0.08819    0.31541   0.280 0.779820    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -1390,12 +561,12 @@ Degrees of Freedom for the fit:  29
       Residual Deg. of Freedom:  1708 
                       at cycle:  47 
  
-Global Deviance:     4895.119 
-            AIC:     4953.119 
-            SBC:     5111.457 
+Global Deviance:     4895.107 
+            AIC:     4953.107 
+            SBC:     5111.445 
 ******************************************************************</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb132"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>******************************************************************
 Family:  c("ZINBI", "Zero inflated negative binomial type I") 
@@ -1463,13 +634,13 @@ Global Deviance:     4839.043
             SBC:     5038.236 
 ******************************************************************</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb134"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(best.model.full, best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GAIC</span>(best.model.full, best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                             df      AIC
 best.model.spline.full 26.70189 4892.446
-best.model.full        29.00000 4953.119</code></pre>
+best.model.full        29.00000 4953.107</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb136"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(best.model.full, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(best.model.full, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1477,7 +648,7 @@ best.model.full        29.00000 4953.119</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb137"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(best.model.spline.full, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rqres.plot</span>(best.model.spline.full, <span class="at">howmany=</span><span class="dv">50</span>, <span class="at">plot=</span><span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1485,11 +656,7 @@ best.model.full        29.00000 4953.119</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb138"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(best.model.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in wp(best.model.full): Some points are missed out 
-increase the y limits using ylim.all</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(best.model.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1497,11 +664,7 @@ increase the y limits using ylim.all</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb140"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in wp(best.model.spline.full): Some points are missed out 
-increase the y limits using ylim.all</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wp</span>(best.model.spline.full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1514,29 +677,25 @@ increase the y limits using ylim.all</code></pre>
 <section id="plot-predictions-of-the-spline-model" class="level2">
 <h2 class="anchored" data-anchor-id="plot-predictions-of-the-spline-model">Plot predictions of the spline model</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb142"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>age.vec <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">70</span>, <span class="dv">1</span>)</span>
-<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>df.predict.aux <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">age =</span> age.vec, <span class="at">darc_genotipo =</span> <span class="fu">unique</span>(df.zinbi<span class="sc">$</span>darc_genotipo))</span>
-<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a>df.predict <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.predict.aux), </span>
-<span id="cb142-4"><a href="#cb142-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="cf">function</span>(i) df.zinbi[<span class="dv">1</span>,] <span class="sc">|&gt;</span> </span>
-<span id="cb142-5"><a href="#cb142-5" aria-hidden="true" tabindex="-1"></a>                                      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"n.vivax"</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">age =</span> df.predict.aux<span class="sc">$</span>age[i],</span>
-<span id="cb142-6"><a href="#cb142-6" aria-hidden="true" tabindex="-1"></a>                                                                             <span class="at">darc_genotipo =</span> df.predict.aux<span class="sc">$</span>darc_genotipo[i]))) </span>
-<span id="cb142-7"><a href="#cb142-7" aria-hidden="true" tabindex="-1"></a>df.predict<span class="sc">$</span>duffy.positive <span class="ot">&lt;-</span> (df.predict<span class="sc">$</span>darc_genotipo <span class="sc">!=</span> <span class="st">"Fy/Fy"</span>)</span>
-<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-9"><a href="#cb142-9" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> df.predict <span class="sc">|&gt;</span> <span class="fu">ungroup</span>() </span>
-<span id="cb142-10"><a href="#cb142-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb142-11"><a href="#cb142-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on mu</span></span>
-<span id="cb142-12"><a href="#cb142-12" aria-hidden="true" tabindex="-1"></a>pred.mu <span class="ot">&lt;-</span> <span class="fu">predict</span>(best.model.spline.full, <span class="at">newdata =</span> newdata, </span>
-<span id="cb142-13"><a href="#cb142-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">what =</span> <span class="st">"mu"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in predict.gamlss(best.model.spline.full, newdata = newdata, what = "mu", : There is a discrepancy  between the original and the re-fit 
- used to achieve 'safe' predictions 
- </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb144"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> pred.mu, <span class="at">darc_genotipo =</span> df.predict<span class="sc">$</span>darc_genotipo)</span>
-<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(darc_genotipo, age)</span>
-<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> darc_genotipo)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
-<span id="cb144-5"><a href="#cb144-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on mu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>age.vec <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">70</span>, <span class="dv">1</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>df.predict.aux <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">age=</span> age.vec, <span class="at">darc_genotipo =</span> <span class="fu">unique</span>(df.zinbi<span class="sc">$</span>darc_genotipo))</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>df.predict <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df.predict.aux), </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>                                    <span class="cf">function</span>(i) df.zinbi[<span class="dv">1</span>,] <span class="sc">|&gt;</span> </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>                                      dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"n.vivax"</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">age =</span> df.predict.aux<span class="sc">$</span>age[i],</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>                                                                             <span class="at">darc_genotipo =</span> df.predict.aux<span class="sc">$</span>darc_genotipo[i]))) </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>df.predict<span class="sc">$</span>duffy.positive <span class="ot">&lt;-</span> (df.predict<span class="sc">$</span>darc_genotipo <span class="sc">!=</span> <span class="st">"Fy/Fy"</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> df.predict <span class="sc">|&gt;</span> <span class="fu">ungroup</span>() </span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on mu</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>pred.mu <span class="ot">&lt;-</span> <span class="fu">predict</span>(best.model.spline.full, <span class="at">newdata =</span> newdata, </span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">what =</span> <span class="st">"mu"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> pred.mu, <span class="at">darc_genotipo =</span> df.predict<span class="sc">$</span>darc_genotipo)</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(darc_genotipo, age)</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> darc_genotipo)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on mu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1544,15 +703,15 @@ increase the y limits using ylim.all</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on nu</span></span>
-<span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a>pred.nu <span class="ot">&lt;-</span> <span class="fu">predict</span>(best.model.spline.full, <span class="at">newdata =</span> newdata, </span>
-<span id="cb145-3"><a href="#cb145-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">what =</span> <span class="st">"nu"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb145-4"><a href="#cb145-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-5"><a href="#cb145-5" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> pred.nu, <span class="at">duffy.positive =</span> df.predict<span class="sc">$</span>duffy.positive)</span>
-<span id="cb145-6"><a href="#cb145-6" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(duffy.positive, age)</span>
-<span id="cb145-7"><a href="#cb145-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-8"><a href="#cb145-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> duffy.positive)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
-<span id="cb145-9"><a href="#cb145-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on nu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on nu</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>pred.nu <span class="ot">&lt;-</span> <span class="fu">predict</span>(best.model.spline.full, <span class="at">newdata =</span> newdata, </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">what =</span> <span class="st">"nu"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> pred.nu, <span class="at">duffy.positive =</span> df.predict<span class="sc">$</span>duffy.positive)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(duffy.positive, age)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> duffy.positive)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on nu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1560,13 +719,13 @@ increase the y limits using ylim.all</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb146"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on the full effect</span></span>
-<span id="cb146-2"><a href="#cb146-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb146-3"><a href="#cb146-3" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> (<span class="dv">1</span><span class="sc">-</span>pred.nu)<span class="sc">*</span>pred.mu, <span class="at">darc_genotipo =</span> df.predict<span class="sc">$</span>darc_genotipo)</span>
-<span id="cb146-4"><a href="#cb146-4" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(darc_genotipo, age)</span>
-<span id="cb146-5"><a href="#cb146-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb146-6"><a href="#cb146-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> darc_genotipo)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
-<span id="cb146-7"><a href="#cb146-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on the expected incidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prediction on the full effect</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">age =</span> df.predict<span class="sc">$</span>age, <span class="at">pred =</span> (<span class="dv">1</span><span class="sc">-</span>pred.nu)<span class="sc">*</span>pred.mu, <span class="at">darc_genotipo =</span> df.predict<span class="sc">$</span>darc_genotipo)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>dfplot <span class="ot">&lt;-</span> dfplot <span class="sc">|&gt;</span>  <span class="fu">arrange</span>(darc_genotipo, age)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dfplot, <span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> pred, <span class="at">colour =</span> darc_genotipo)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age"</span>, <span class="at">y =</span> <span class="st">"Effect"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Effect on the expected incidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1614,7 +773,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const onCopySuccess = function(e) {
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1646,29 +816,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
   });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -1676,7 +824,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
